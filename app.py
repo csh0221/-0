@@ -65,8 +65,9 @@ with tab1:
         incident_angle_deg = st.slider("입사각 (Incident Angle, θ_i)", 0, 75, 30, step=1, key="tab1_inc")
         wavelength_nm = st.slider("입사광 파장 (Wavelength, nm)", 400, 700, 550, step=10, key="tab1_wave")
 
-        def wavelength_to_rgb(wavelength):
+        def wavelength_to_rgb(wl):
             gamma = 0.8
-            if 380 <= wavelength <= 440:
-                r, g, b = -(wavelength - 440) / (440 - 380), 0.0, 1.0
-            elif 440 <= wavelength <=
+            if wl < 440:
+                r, g, b = -(wl - 440) / 60.0, 0.0, 1.0
+            elif wl < 490:
+                r, g, b = 0.0, (wl - 440) / 50.0, 1
