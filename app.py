@@ -96,32 +96,4 @@ with tab1:
         # e-ray 유효 굴절률 및 굴절각 계산
         n_e_eff = 1.0 / np.sqrt((np.cos(theta_OA) / n_o)**2 + (np.sin(theta_OA) / n_e)**2)
         sin_theta_re = np.sin(theta_i) / n_e_eff
-        theta_r_e = np.arcsin(np.clip(sin_theta_re, -1.0, 1.0))
-
-        fig1, ax1 = plt.subplots(figsize=(8, 6))
-        
-        # 영역 표시
-        ax1.fill_between([-4, 4], 0, 4, color='#e0f7fa', alpha=0.4, label="Air (n=1.0)")
-        ax1.fill_between([-4, 4], -4, 0, color='#e8eaf6', alpha=0.6, label=f"Crystal ({material_choice})")
-        ax1.axhline(0, color='black', lw=2)
-        ax1.axvline(0, color='gray', linestyle='--', alpha=0.7, label="Normal Line")
-
-        # 입사광선
-        x_inc = [-3 * np.tan(theta_i), 0]
-        y_inc = [3, 0]
-        ax1.plot(x_inc, y_inc, color=light_color, lw=3, label="Incident Light")
-
-        # o-ray (정상 광선)
-        x_o = [0, 3 * np.sin(theta_r_o)]
-        y_o = [0, -3 * np.cos(theta_r_o)]
-        ax1.plot(x_o, y_o, color='#1e88e5', lw=2.5, linestyle='-', label=f"o-ray (n_o={n_o:.3f})")
-
-        # e-ray (비정상 광선)
-        x_e = [0, 3 * np.sin(theta_r_e)]
-        y_e = [0, -3 * np.cos(theta_r_e)]
-        ax1.plot(x_e, y_e, color='#e53935', lw=2.5, linestyle='--', label=f"e-ray (n_eff={n_e_eff:.3f})")
-
-        # 광축 표시
-        oa_dx = np.cos(theta_OA)
-        oa_dy = -np.sin(theta_OA)
-        ax1.quiver(0, -2, oa_dx, oa_dy, scale=3, color='purple', alpha=0.8, label=f"Optic Axis ({
+        theta_r_e = np.arcsin(np.clip(sin_theta_re, -1.0, 1.0
