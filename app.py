@@ -1,31 +1,6 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
-import os
-
-# -----------------------------------------------------------------------------
-# 1. 한글 폰트 설정 (Windows, Mac, Linux / Streamlit Cloud 공통)
-# -----------------------------------------------------------------------------
-def setup_korean_font():
-    font_names = [f.name for f in fm.fontManager.ttflist]
-    
-    if 'NanumGothic' in font_names:
-        plt.rcParams['font.family'] = 'NanumGothic'
-    elif 'Malgun Gothic' in font_names:
-        plt.rcParams['font.family'] = 'Malgun Gothic'
-    elif 'AppleGothic' in font_names:
-        plt.rcParams['font.family'] = 'AppleGothic'
-    else:
-        nanum_fonts = [f for f in font_names if 'Nanum' in f]
-        if nanum_fonts:
-            plt.rcParams['font.family'] = nanum_fonts[0]
-        else:
-            plt.rcParams['font.family'] = 'sans-serif'
-            
-    plt.rcParams['axes.unicode_minus'] = False
-
-setup_korean_font()
 
 # -----------------------------------------------------------------------------
 # 페이지 기본 설정
@@ -97,4 +72,56 @@ with tab1:
             elif 440 <= wavelength <= 490:
                 r, g, b = 0.0, (wavelength - 440) / (490 - 440), 1.0
             elif 490 <= wavelength <= 510:
-                r, g, b = 0.0, 1
+                r, g, b = 0.0, 1.0, -(wavelength - 510) / (510 - 490)
+            elif 510 <= wavelength <= 580:
+                r, g, b = (wavelength - 510) / (580 - 510), 1.0, 0.0
+            elif 580 <= wavelength <= 645:
+                r, g, b = 1.0, -(wavelength - 645) / (645 - 580), 0.0
+            elif 645 <= wavelength <= 780:
+                r, g, b = 1.0, 0.0, 0.0
+            else:
+                r, g, b = 0.0, 0.0, 0.0
+            return (r ** gamma, g ** gamma, b ** gamma)
+
+        light_color = wavelength_to_rgb(wavelength_nm)
+
+    with col2:
+        theta_i = np.radians(incident_angle_deg)
+        theta_OA = np.radians(optic_axis_deg)
+
+        # o-ray 굴절각 계산
+        sin_theta_ro = np.sin(theta_i) / n_o
+        theta_r_o = np.arcsin(np.clip(sin_theta_ro, -1.0, 1.0))
+
+        # e-ray 유효 굴절률 및 굴절각 계산
+        n_e_eff = 1.0 / np.sqrt((np.cos(theta_OA) / n_o)**2 + (np.sin(theta_OA) / n_e)**2)
+        sin_theta_re = np.sin(theta_i) / n_e_eff
+        theta_r_e = np.arcsin(np.clip(sin_theta_re, -1.0, 1.0))
+
+        fig1, ax1 = plt.subplots(figsize=(8, 6))
+        
+        # 영역 표시
+        ax1.fill_between([-4, 4], 0, 4, color='#e0f7fa', alpha=0.4, label="Air (n=1.0)")
+        ax1.fill_between([-4, 4], -4, 0, color='#e8eaf6', alpha=0.6, label=f"Crystal ({material_choice})")
+        ax1.axhline(0, color='black', lw=2)
+        ax1.axvline(0, color='gray', linestyle='--', alpha=0.7, label="Normal Line")
+
+        # 입사광선
+        x_inc = [-3 * np.tan(theta_i), 0]
+        y_inc = [3, 0]
+        ax1.plot(x_inc, y_inc, color=light_color, lw=3, label="Incident Light")
+
+        # o-ray (정상 광선)
+        x_o = [0, 3 * np.sin(theta_r_o)]
+        y_o = [0, -3 * np.cos(theta_r_o)]
+        ax1.plot(x_o, y_o, color='#1e88e5', lw=2.5, linestyle='-', label=f"o-ray (n_o={n_o:.3f})")
+
+        # e-ray (비정상 광선)
+        x_e = [0, 3 * np.sin(theta_r_e)]
+        y_e = [0, -3 * np.cos(theta_r_e)]
+        ax1.plot(x_e, y_e, color='#e53935', lw=2.5, linestyle='--', label=f"e-ray (n_eff={n_e_eff:.3f})")
+
+        # 광축 표시
+        oa_dx = np.cos(theta_OA)
+        oa_dy = -np.sin(theta_OA)
+        ax1.quiver(0, -2, oa_dx, oa_dy, scale=3, color='purple', alpha=0.8, label=f"Optic Axis ({
