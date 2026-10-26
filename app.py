@@ -69,31 +69,4 @@ with tab1:
             gamma = 0.8
             if 380 <= wavelength <= 440:
                 r, g, b = -(wavelength - 440) / (440 - 380), 0.0, 1.0
-            elif 440 <= wavelength <= 490:
-                r, g, b = 0.0, (wavelength - 440) / (490 - 440), 1.0
-            elif 490 <= wavelength <= 510:
-                r, g, b = 0.0, 1.0, -(wavelength - 510) / (510 - 490)
-            elif 510 <= wavelength <= 580:
-                r, g, b = (wavelength - 510) / (580 - 510), 1.0, 0.0
-            elif 580 <= wavelength <= 645:
-                r, g, b = 1.0, -(wavelength - 645) / (645 - 580), 0.0
-            elif 645 <= wavelength <= 780:
-                r, g, b = 1.0, 0.0, 0.0
-            else:
-                r, g, b = 0.0, 0.0, 0.0
-            return (r ** gamma, g ** gamma, b ** gamma)
-
-        light_color = wavelength_to_rgb(wavelength_nm)
-
-    with col2:
-        theta_i = np.radians(incident_angle_deg)
-        theta_OA = np.radians(optic_axis_deg)
-
-        # o-ray 굴절각 계산
-        sin_theta_ro = np.sin(theta_i) / n_o
-        theta_r_o = np.arcsin(np.clip(sin_theta_ro, -1.0, 1.0))
-
-        # e-ray 유효 굴절률 및 굴절각 계산
-        n_e_eff = 1.0 / np.sqrt((np.cos(theta_OA) / n_o)**2 + (np.sin(theta_OA) / n_e)**2)
-        sin_theta_re = np.sin(theta_i) / n_e_eff
-        theta_r_e = np.arcsin(np.clip(sin_theta_re, -1.0, 1.0
+            elif 440 <= wavelength <=
