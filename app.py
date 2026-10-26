@@ -59,7 +59,6 @@ with tab1:
     with col1:
         st.subheader("⚙️ 결정을 이루는 광학적 매개변수")
 
-        # 물질 선택에 따른 session_state 자동 업데이트 콜백
         def update_material_indices():
             mat = st.session_state.tab1_material
             if mat == "방해석 (Calcite)":
@@ -72,7 +71,6 @@ with tab1:
                 st.session_state.tab1_no = 2.616
                 st.session_state.tab1_ne = 2.903
 
-        # 초기 값 세팅
         if 'tab1_no' not in st.session_state:
             st.session_state.tab1_no = 1.658
         if 'tab1_ne' not in st.session_state:
@@ -89,4 +87,14 @@ with tab1:
         n_e = st.slider("비정상광선 굴절률 (n_e)", 1.000, 3.000, key="tab1_ne", step=0.001)
         
         optic_axis_deg = st.slider("광축 각도 (Optic Axis Angle, θ_OA)", 0, 90, 45, step=1, key="tab1_oa")
-        incident_angle_deg = st.slider("입사각
+        incident_angle_deg = st.slider("입사각 (Incident Angle, θ_i)", 0, 75, 30, step=1, key="tab1_inc")
+        wavelength_nm = st.slider("입사광 파장 (Wavelength, nm)", 400, 700, 550, step=10, key="tab1_wave")
+
+        def wavelength_to_rgb(wavelength):
+            gamma = 0.8
+            if 380 <= wavelength <= 440:
+                r, g, b = -(wavelength - 440) / (440 - 380), 0.0, 1.0
+            elif 440 <= wavelength <= 490:
+                r, g, b = 0.0, (wavelength - 440) / (490 - 440), 1.0
+            elif 490 <= wavelength <= 510:
+                r, g, b = 0.0, 1
