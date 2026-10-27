@@ -159,7 +159,7 @@ with tab2:
         st.subheader("🎛️ 시험편 및 응력 조건 설정")
         model_type = st.selectbox(
             "하중 시험편 형태 선택",
-            ["3점 굽힘 보 (3-Point Bending Beam)", "원형 압축 링 (Compressed Ring)"
+            ["3점 굽힘 보 (3-Point Bending Beam)", "원형 압축 링 (Compressed Ring)"]
         )
 
         load_force = st.slider("인가 하중 / 응력 크기 (Load, N)", 10, 200, 80, step=5, key="tab2_force")
