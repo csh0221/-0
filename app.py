@@ -150,7 +150,7 @@ with tab2:
 
     with c1:
         st.subheader("🎛️ 시험편 및 응력 조건 설정")
-        model_type = st.selectbox("하중 시험편 형태 선택", ["3점 굽힘 보 (3-Point Bending Beam)", "원형 압축 링 (Compressed Ring)"])
+        model_type = st.selectbox("하중 시험편 형태 선택", ["3점 굽힘 보 (3-Point Bending Beam)"])
         load_force = st.slider("인가 하중 / 응력 크기 (Load, N)", 10, 200, 80, step=5, key="tab2_force")
         fringe_constant = st.slider("재료 광탄성 정수 (C, GPa⁻¹)", 0.5, 5.0, 2.0, step=0.1, key="tab2_C")
         pol_choice = st.radio("편광기 구성 (Polariscope Type)", ["평면 편광기 (Plane Polariscope)", "원 편광기 (Circular Polariscope)"], key="tab2_pol")
@@ -171,17 +171,7 @@ with tab2:
             sigma_x = M * Y
             sigma_y = np.zeros_like(X)
             tau_xy = -P * np.sign(X) * (1.0 - Y**2) * 0.5
-        else:
-            R_outer, R_inner = 1.0, 0.4
-            r = np.sqrt(X**2 + Y**2)
-            r = np.maximum(r, 0.01)
-            mask = (r < R_inner) | (r > R_outer)
-            sigma_x = load_force * 0.2 * (1 - (R_inner/r)**2) * np.cos(2*np.arctan2(Y, X))
-            sigma_y = -load_force * 0.2 * (1 + (R_inner/r)**2) * np.sin(2*np.arctan2(Y, X))
-            tau_xy = load_force * 0.2 * (R_inner/r)**2 * np.sin(2*np.arctan2(Y, X))
-            sigma_x[mask] = 0
-            sigma_y[mask] = 0
-            tau_xy[mask] = 0
+
 
         center_stress = (sigma_x + sigma_y) / 2.0
         radius_stress = np.sqrt(((sigma_x - sigma_y) / 2.0)**2 + tau_xy**2)
