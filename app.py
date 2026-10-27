@@ -131,11 +131,8 @@ with tab1:
         re_deg_val = round(np.degrees(theta_r_e), 2)
         diff_deg_val = round(abs(np.degrees(theta_r_o - theta_r_e)), 2)
 
-        st.info("**📊 계산 결과 (Ray Trajectory Data):**\n" +
-                f"* 복굴절률 차이 (Δn = n_e - n_o): `{delta_n_val:+.4f}`\n" +
-                f"* o-ray 굴절각: `{ro_deg_val}°`\n" +
-                f"* e-ray 굴절각: `{re_deg_val}°`\n" +
-                f"* 광선 분리 각도 (Δθ): `{diff_deg_val}°`")
+        info_text = "**📊 계산 결과 (Ray Trajectory Data):**\n" + f"* 복굴절률 차이 (Δn = n_e - n_o): `{delta_n_val:+.4f}`\n" + f"* o-ray 굴절각: `{ro_deg_val}°`\n" + f"* e-ray 굴절각: `{re_deg_val}°`\n" + f"* 광선 분리 각도 (Δθ): `{diff_deg_val}°`"
+        st.info(info_text)
 
 # =============================================================================
 # TAB 2: 광탄성 응력 해석 (Photoelasticity)
@@ -220,9 +217,8 @@ with tab2:
         st.pyplot(fig2)
         plt.close(fig2)
 
-        st.success("💡 **관찰 포인트:**\n" +
-                   "* **등색선 (Isochromatic Fringes):** 무지개 색상 띠의 밀도가 높은 곳이 **응력 집중(Stress Concentration)** 지역입니다.\n" +
-                   "* **등경사선 (Isoclinics):** 평면 편광기 모드의 검은색 띠는 **주응력 방향이 편광축과 일치하는 위치**를 의미합니다.")
+        success_text = "💡 **관찰 포인트:**\n* **등색선 (Isochromatic Fringes):** 무지개 색상 띠의 밀도가 높은 곳이 **응력 집중(Stress Concentration)** 지역입니다.\n* **등경사선 (Isoclinics):** 평면 편광기 모드의 검은색 띠는 **주응력 방향이 편광축과 일치하는 위치**를 의미합니다."
+        st.success(success_text)
 
 # =============================================================================
 # TAB 3: 이론 및 수식 정리
@@ -242,4 +238,12 @@ with tab3:
     st.markdown("---")
 
     st.subheader("2. 광탄성 법칙 (Photoelasticity & Stress-Optic Law)")
-    st.write("외부 응력을
+    st.write("외부 응력을 받는 투명 변형체에 편광을 통과시키면 주응력 차이에 비례하여 위상차가 발생합니다.")
+
+    st.markdown("**Brewster의 광탄성 법칙:**")
+    st.latex(r"n_1 - n_2 = C (\sigma_1 - \sigma_2)")
+
+    st.markdown("**상대 위상차 (Relative Retardation, $\delta$):**")
+    st.latex(r"\delta = \frac{2\pi d}{\lambda} (n_1 - n_2) = \frac{2\pi d}{\lambda} C (\sigma_1 - \sigma_2)")
+
+    st.markdown("* $n_1, n_2$: 주응력 방향의 굴절률\n* $\sigma_1, \sigma_2$: 주응력 (Principal Stresses)\n* $C$: 재료의 광탄성 계수 (Stress-Optic Coefficient)\n* $d$: 시험편의 두께, $\lambda$: 투과하는 빛의 파장")
