@@ -12,9 +12,7 @@ st.set_page_config(
 )
 
 st.title("🔬 광학적 이방체(복굴절) 및 광탄성(Photoelasticity) 시뮬레이터")
-st.markdown("""
-이 앱은 **결정체의 광학적 이방성(Birefringence)**과 **재료의 광탄성 응력 해석(Photoelastic Stress Analysis)** 개념을 수치 시뮬레이션 및 시각화로 제공합니다.
-""")
+st.markdown("이 앱은 **결정체의 광학적 이방성(Birefringence)**과 **재료의 광탄성 응력 해석(Photoelastic Stress Analysis)** 개념을 수치 시뮬레이션 및 시각화로 제공합니다.")
 
 tab1, tab2, tab3 = st.tabs([
     "💎 1. 광학적 이방체 & 복굴절 (Birefringence)", 
@@ -133,10 +131,10 @@ with tab1:
         re_deg_val = round(np.degrees(theta_r_e), 2)
         diff_deg_val = round(abs(np.degrees(theta_r_o - theta_r_e)), 2)
 
-        st.info(f"**📊 계산 결과 (Ray Trajectory Data):**\n"
-                f"* 복굴절률 차이 (Δn = n_e - n_o): `{delta_n_val:+.4f}`\n"
-                f"* o-ray 굴절각: `{ro_deg_val}°`\n"
-                f"* e-ray 굴절각: `{re_deg_val}°`\n"
+        st.info("**📊 계산 결과 (Ray Trajectory Data):**\n" +
+                f"* 복굴절률 차이 (Δn = n_e - n_o): `{delta_n_val:+.4f}`\n" +
+                f"* o-ray 굴절각: `{ro_deg_val}°`\n" +
+                f"* e-ray 굴절각: `{re_deg_val}°`\n" +
                 f"* 광선 분리 각도 (Δθ): `{diff_deg_val}°`")
 
 # =============================================================================
@@ -177,7 +175,6 @@ with tab2:
             r = np.maximum(r, 0.01)
             mask = (r < R_inner) | (r > R_outer)
             
-            # 원형 압축 링 모델 응력 스케일 보정
             P = load_force * 0.005
             sigma_x = P * (1.0 - (R_inner / r)**2) * np.cos(2.0 * np.arctan2(Y, X))
             sigma_y = -P * (1.0 + (R_inner / r)**2) * np.sin(2.0 * np.arctan2(Y, X))
@@ -223,11 +220,9 @@ with tab2:
         st.pyplot(fig2)
         plt.close(fig2)
 
-        st.success("""
-        💡 **관찰 포인트:**
-        * **등색선 (Isochromatic Fringes):** 무지개 색상 띠의 밀도가 높은 곳이 **응력 집중(Stress Concentration)** 지역입니다.
-        * **등경사선 (Isoclinics):** 평면 편광기 모드의 검은색 띠는 **주응력 방향이 편광축과 일치하는 위치**를 의미합니다.
-        """)
+        st.success("💡 **관찰 포인트:**\n" +
+                   "* **등색선 (Isochromatic Fringes):** 무지개 색상 띠의 밀도가 높은 곳이 **응력 집중(Stress Concentration)** 지역입니다.\n" +
+                   "* **등경사선 (Isoclinics):** 평면 편광기 모드의 검은색 띠는 **주응력 방향이 편광축과 일치하는 위치**를 의미합니다.")
 
 # =============================================================================
 # TAB 3: 이론 및 수식 정리
@@ -236,9 +231,7 @@ with tab3:
     st.header("📚 광학적 이방성 & 광탄성 수학적 모델")
 
     st.subheader("1. 광학적 이방체 및 복굴절 (Birefringence)")
-    st.write("""
-    등방성 매질(공기, 유리)에서는 빛의 속도가 방향에 상관없이 일정하지만, 이방성 결정(방해석, 수정 등)에서는 결정축 방향에 따라 굴절률이 달라집니다.
-    """)
+    st.write("등방성 매질(공기, 유리)에서는 빛의 속도가 방향에 상관없이 일정하지만, 이방성 결정(방해석, 수정 등)에서는 결정축 방향에 따라 굴절률이 달라집니다.")
     
     st.markdown("**정상광선 (Ordinary Ray, $o$-ray) 굴절률:**")
     st.latex(r"n_o = \text{Constant}")
@@ -249,15 +242,4 @@ with tab3:
     st.markdown("---")
 
     st.subheader("2. 광탄성 법칙 (Photoelasticity & Stress-Optic Law)")
-    st.write("""
-    외부 응력을 받는 투명 변형체에 편광을 통과시키면 주응력 차이에 비례하여 위상차가 발생합니다.
-    """)
-
-    st.markdown("**Brewster의 광탄성 법칙:**")
-    st.latex(r"n_1 - n_2 = C (\sigma_1 - \sigma_2)")
-
-    st.markdown("**상대 위상차 (Relative Retardation, $\delta$):**")
-    st.latex(r"\delta = \frac{2\pi d}{\lambda} (n_1 - n_2) = \frac{2\pi d}{\lambda} C (\sigma_1 - \sigma_2)")
-
-    st.markdown("""
-    * $n_1, n_2$: 주응력 방향의 굴절률
+    st.write("외부 응력을
