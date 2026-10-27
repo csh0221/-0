@@ -179,7 +179,7 @@ with tab2:
             sigma_x = M * Y * 3.0
             sigma_y = np.zeros_like(X)
             tau_xy = -load_force * np.sign(X) * (1 - Y**2) * 0.5
-        elif model_type == "원형 압축 링 (Compressed Ring)":
+        else:
             R_outer, R_inner = 1.0, 0.4
             r = np.sqrt(X**2 + Y**2)
             r = np.maximum(r, 0.01)
@@ -190,16 +190,6 @@ with tab2:
             sigma_x[mask] = 0
             sigma_y[mask] = 0
             tau_xy[mask] = 0
-        else:
-            r_notch = np.sqrt(X**2 + Y**2)
-            notch_mask = (np.abs(X) < 0.3) & (np.abs(Y) > 0.6)
-            kt = 1.0 + 2.5 / (r_notch + 0.2)
-            sigma_x = np.zeros_like(X)
-            sigma_y = load_force * kt * 0.3
-            tau_xy = load_force * 0.05 * X * Y
-            sigma_x[notch_mask] = 0
-            sigma_y[notch_mask] = 0
-            tau_xy[notch_mask] = 0
 
         center_stress = (sigma_x + sigma_y) / 2.0
         radius_stress = np.sqrt(((sigma_x - sigma_y) / 2.0)**2 + tau_xy**2)
