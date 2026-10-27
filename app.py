@@ -166,7 +166,7 @@ with tab2:
 
         if model_type == "3점 굽힘 보 (3-Point Bending Beam)":
             L = 4.0
-            P = load_force * 0.5
+            P = load_force * 0.1
             M = P * (L / 2.0 - np.abs(X))
             sigma_x = M * Y
             sigma_y = np.zeros_like(X)
@@ -176,12 +176,16 @@ with tab2:
             r = np.sqrt(X**2 + Y**2)
             r = np.maximum(r, 0.01)
             mask = (r < R_inner) | (r > R_outer)
-            sigma_x = load_force * 0.2 * (1 - (R_inner/r)**2) * np.cos(2*np.arctan2(Y, X))
-            sigma_y = -load_force * 0.2 * (1 + (R_inner/r)**2) * np.sin(2*np.arctan2(Y, X))
-            tau_xy = load_force * 0.2 * (R_inner/r)**2 * np.sin(2*np.arctan2(Y, X))
-            sigma_x[mask] = 0
-            sigma_y[mask] = 0
-            tau_xy[mask] = 0
+            
+            # 원형 압축 링 모델 응력 스케일 보정
+            P = load_force * 0.005
+            sigma_x = P * (1.0 - (R_inner / r)**2) * np.cos(2.0 * np.arctan2(Y, X))
+            sigma_y = -P * (1.0 + (R_inner / r)**2) * np.sin(2.0 * np.arctan2(Y, X))
+            tau_xy = P * (R_inner / r)**2 * np.sin(2.0 * np.arctan2(Y, X))
+            
+            sigma_x[mask] = 0.0
+            sigma_y[mask] = 0.0
+            tau_xy[mask] = 0.0
 
         center_stress = (sigma_x + sigma_y) / 2.0
         radius_stress = np.sqrt(((sigma_x - sigma_y) / 2.0)**2 + tau_xy**2)
@@ -189,19 +193,19 @@ with tab2:
         sigma_1 = center_stress + radius_stress
         sigma_2 = center_stress - radius_stress
 
-        theta_p = 0.5 * np.arctan2(2 * tau_xy, sigma_x - sigma_y)
+        theta_p = 0.5 * np.arctan2(2.0 * tau_xy, sigma_x - sigma_y)
         delta = fringe_constant * (sigma_1 - sigma_2)
 
         lambda_r = 650.0
         lambda_g = 540.0
         lambda_b = 450.0
 
-        I_r = np.sin(delta * 200.0 / lambda_r) ** 2
-        I_g = np.sin(delta * 200.0 / lambda_g) ** 2
-        I_b = np.sin(delta * 200.0 / lambda_b) ** 2
+        I_r = np.sin(delta * 25.0 / lambda_r) ** 2
+        I_g = np.sin(delta * 25.0 / lambda_g) ** 2
+        I_b = np.sin(delta * 25.0 / lambda_b) ** 2
 
         if show_isoclinic:
-            isoclinic_factor = np.sin(2 * theta_p)**2
+            isoclinic_factor = np.sin(2.0 * theta_p)**2
             I_r *= isoclinic_factor
             I_g *= isoclinic_factor
             I_b *= isoclinic_factor
@@ -257,7 +261,3 @@ with tab3:
 
     st.markdown("""
     * $n_1, n_2$: 주응력 방향의 굴절률
-    * $\sigma_1, \sigma_2$: 주응력 (Principal Stresses)
-    * $C$: 재료의 광탄성 계수 (Stress-Optic Coefficient)
-    * $d$: 시험편의 두께, $\lambda$: 투과하는 빛의 파장
-    """)
