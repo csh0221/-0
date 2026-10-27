@@ -164,32 +164,39 @@ with tab2:
 
         load_force = st.slider("인가 하중 / 응력 크기 (Load, N)", 10, 200, 80, step=5, key="tab2_force")
         fringe_constant = st.slider("재료 광탄성 정수 (C, GPa⁻¹)", 0.5, 5.0, 2.0, step=0.1, key="tab2_C")
-        pol_mode = st.radio("편광기 구성 (Polariscope Type)", ["평면 편광기 (Plane Polariscope)", "원 편광기 (Circular Polariscope)"], key="tab2_pol")
-        show_isoclinic = (pol_mode == "평면 편광기 (Plane Polariscope)")
+        pol_choice = st.radio("편광기 구성 (Polariscope Type)", ["평면 편광기 (Plane Polariscope)", "원 편광기 (Circular Polariscope)"], key="tab2_pol")
+        
+        # 영문 타이틀 텍스트로 변환하여 한글 깨짐 방지
+        title_pol_str = "Plane Polariscope" if "Plane" in pol_choice else "Circular Polariscope"
+        show_isoclinic = ("Plane" in pol_choice)
 
     with c2:
-        nx, ny = 300, 150
+        nx, ny = 400, 200
         x = np.linspace(-2, 2, nx)
         y = np.linspace(-1, 1, ny)
         X, Y = np.meshgrid(x, y)
 
         if model_type == "3점 굽힘 보 (3-Point Bending Beam)":
-            M = load_force * (2.0 - np.abs(X))
-            sigma_x = M * Y * 3.0
+            # 3점 굽힘 보의 연속적 응력 모델 (L = 4.0)
+            L = 4.0
+            P = load_force * 0.05
+            M = P * (L / 2.0 - np.abs(X))
+            sigma_x = M * Y
             sigma_y = np.zeros_like(X)
-            tau_xy = -load_force * np.sign(X) * (1 - Y**2) * 0.5
-        else:
+            tau_xy = -P * np.sign(X) * (1.0 - Y**2) * 0.5
+        else: # 원형 압축 링
             R_outer, R_inner = 1.0, 0.4
             r = np.sqrt(X**2 + Y**2)
             r = np.maximum(r, 0.01)
             mask = (r < R_inner) | (r > R_outer)
-            sigma_x = load_force * (1 - (R_inner/r)**2) * np.cos(2*np.arctan2(Y, X))
-            sigma_y = -load_force * (1 + (R_inner/r)**2) * np.sin(2*np.arctan2(Y, X))
-            tau_xy = load_force * (R_inner/r)**2 * np.sin(2*np.arctan2(Y, X))
+            sigma_x = load_force * 0.02 * (1 - (R_inner/r)**2) * np.cos(2*np.arctan2(Y, X))
+            sigma_y = -load_force * 0.02 * (1 + (R_inner/r)**2) * np.sin(2*np.arctan2(Y, X))
+            tau_xy = load_force * 0.02 * (R_inner/r)**2 * np.sin(2*np.arctan2(Y, X))
             sigma_x[mask] = 0
             sigma_y[mask] = 0
             tau_xy[mask] = 0
 
+        # 주응력 및 방향각 계산
         center_stress = (sigma_x + sigma_y) / 2.0
         radius_stress = np.sqrt(((sigma_x - sigma_y) / 2.0)**2 + tau_xy**2)
         
@@ -199,12 +206,14 @@ with tab2:
         theta_p = 0.5 * np.arctan2(2 * tau_xy, sigma_x - sigma_y)
         delta = fringe_constant * (sigma_1 - sigma_2)
 
+        # R, G, B 채널별 광도 스케일링
         lambda_r, lambda_g, lambda_b = 650, 540, 450
         
-        I_r = np.sin(delta * 1000 / lambda_r)**2
-        I_g = np.sin(delta * 1000 / lambda_g)**2
-        I_b = np.sin(delta * 1000 / lambda_b)**2
+        I_r = np.sin(delta * 10.0 / lambda_r)**2
+        I_g = np.sin(delta * 10.0 / lambda_g)**2
+        I_b = np.sin(delta * 10.0 / lambda_b)**2
 
+        # 평면 편광기일 경우 등경사선(Isoclinics) 적용
         if show_isoclinic:
             isoclinic_factor = np.sin(2 * theta_p)**2
             I_r *= isoclinic_factor
@@ -215,8 +224,10 @@ with tab2:
         RGB = np.clip(RGB, 0, 1)
 
         fig2, ax2 = plt.subplots(figsize=(10, 5))
-        ax2.imshow(RGB, extent=[-2, 2, -1, 1])
-        ax2.set_title("Photoelastic Stress Pattern (" + pol_mode + ")", fontsize=12, fontweight='bold')
+        ax2.imshow(RGB, extent=[-2, 2, -1, 1], origin='lower')
+        
+        # 순수 영문 타이틀 사용하여 네모 깨짐 방지
+        ax2.set_title("Photoelastic Stress Pattern (" + title_pol_str + ")", fontsize=12, fontweight='bold')
         ax2.set_xlabel("X (cm)")
         ax2.set_ylabel("Y (cm)")
         
