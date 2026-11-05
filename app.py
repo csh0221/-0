@@ -135,117 +135,14 @@ with tab1:
         st.info(info_text)
 
 # =============================================================================
-# TAB 2: 광탄성 응력 해석 (Photoelasticity)
+# TAB 2: 광탄성 응력 해석 (Photoelasticity - 일자다리 3점 굽힘 전용)
 # =============================================================================
 with tab2:
     st.header("🔧 광탄성 응력 무늬 및 편광기 시뮬레이션")
-    st.caption("외부 응력을 받는 투명 고분자 시험편이 시클로-광탄성 효과에 의해 무지개 색상의 간섭 무늬(Isochromatics)를 생성하는 현상입니다.")
+    st.caption("외부 하중을 받는 일자다리(3점 굽힘 보) 구조물이 광탄성 효과에 의해 응력 간섭 무늬를 형성하는 시뮬레이션입니다.")
 
     c1, c2 = st.columns([1, 2])
 
     with c1:
-        st.subheader("🎛️ 시험편 및 응력 조건 설정")
-        model_type = st.selectbox("하중 시험편 형태 선택", ["3점 굽힘 보 (3-Point Bending Beam)", "원형 압축 링 (Compressed Ring)"])
-        load_force = st.slider("인가 하중 / 응력 크기 (Load, N)", 10, 200, 80, step=5, key="tab2_force")
-        fringe_constant = st.slider("재료 광탄성 정수 (C, GPa⁻¹)", 0.5, 5.0, 2.0, step=0.1, key="tab2_C")
-        pol_choice = st.radio("편광기 구성 (Polariscope Type)", ["평면 편광기 (Plane Polariscope)", "원 편광기 (Circular Polariscope)"], key="tab2_pol")
-        
-        title_pol_str = "Plane Polariscope" if "Plane" in pol_choice else "Circular Polariscope"
-        show_isoclinic = ("Plane" in pol_choice)
-
-    with c2:
-        nx, ny = 400, 200
-        x = np.linspace(-2, 2, nx)
-        y = np.linspace(-1, 1, ny)
-        X, Y = np.meshgrid(x, y)
-
-        if model_type == "3점 굽힘 보 (3-Point Bending Beam)":
-            L = 4.0
-            P = load_force * 0.1
-            M = P * (L / 2.0 - np.abs(X))
-            sigma_x = M * Y
-            sigma_y = np.zeros_like(X)
-            tau_xy = -P * np.sign(X) * (1.0 - Y**2) * 0.5
-            scale_factor = 25.0
-        else:
-            R_outer, R_inner = 1.0, 0.4
-            r = np.sqrt(X**2 + Y**2)
-            r = np.maximum(r, 0.01)
-            mask = (r < R_inner) | (r > R_outer)
-            
-            P = load_force * 0.005
-            sigma_x = P * (1.0 - (R_inner / r)**2) * np.cos(2.0 * np.arctan2(Y, X))
-            sigma_y = -P * (1.0 + (R_inner / r)**2) * np.sin(2.0 * np.arctan2(Y, X))
-            tau_xy = P * (R_inner / r)**2 * np.sin(2.0 * np.arctan2(Y, X))
-            
-            sigma_x[mask] = 0.0
-            sigma_y[mask] = 0.0
-            tau_xy[mask] = 0.0
-            scale_factor = 25.0
-
-        center_stress = (sigma_x + sigma_y) / 2.0
-        radius_stress = np.sqrt(((sigma_x - sigma_y) / 2.0)**2 + tau_xy**2)
-        
-        sigma_1 = center_stress + radius_stress
-        sigma_2 = center_stress - radius_stress
-
-        theta_p = 0.5 * np.arctan2(2.0 * tau_xy, sigma_x - sigma_y)
-        delta = fringe_constant * (sigma_1 - sigma_2)
-
-        lambda_r = 650.0
-        lambda_g = 540.0
-        lambda_b = 450.0
-
-        I_r = np.sin(delta * scale_factor / lambda_r) ** 2
-        I_g = np.sin(delta * scale_factor / lambda_g) ** 2
-        I_b = np.sin(delta * scale_factor / lambda_b) ** 2
-
-        if show_isoclinic:
-            isoclinic_factor = np.sin(2.0 * theta_p)**2
-            I_r *= isoclinic_factor
-            I_g *= isoclinic_factor
-            I_b *= isoclinic_factor
-
-        RGB = np.stack([I_r, I_g, I_b], axis=-1)
-        RGB = np.clip(RGB, 0.0, 1.0)
-
-        fig2, ax2 = plt.subplots(figsize=(10, 5))
-        ax2.imshow(RGB, extent=[-2, 2, -1, 1], origin='lower')
-        
-        ax2.set_title("Photoelastic Stress Pattern (" + title_pol_str + ")", fontsize=12, fontweight='bold')
-        ax2.set_xlabel("X (cm)")
-        ax2.set_ylabel("Y (cm)")
-        
-        st.pyplot(fig2)
-        plt.close(fig2)
-
-        success_text = "💡 **관찰 포인트:**\n* **등색선 (Isochromatic Fringes):** 무지개 색상 띠의 밀도가 높은 곳이 **응력 집중(Stress Concentration)** 지역입니다.\n* **등경사선 (Isoclinics):** 평면 편광기 모드의 검은색 띠는 **주응력 방향이 편광축과 일치하는 위치**를 의미합니다."
-        st.success(success_text)
-
-# =============================================================================
-# TAB 3: 이론 및 수식 정리
-# =============================================================================
-with tab3:
-    st.header("📚 광학적 이방성 & 광탄성 수학적 모델")
-
-    st.subheader("1. 광학적 이방체 및 복굴절 (Birefringence)")
-    st.write("등방성 매질(공기, 유리)에서는 빛의 속도가 방향에 상관없이 일정하지만, 이방성 결정(방해석, 수정 등)에서는 결정축 방향에 따라 굴절률이 달라집니다.")
-    
-    st.markdown("**정상광선 (Ordinary Ray, $o$-ray) 굴절률:**")
-    st.latex(r"n_o = \text{Constant}")
-
-    st.markdown("**비정상광선 (Extraordinary Ray, $e$-ray) 유효 굴절률 ($n_e(\theta)$):**")
-    st.latex(r"\frac{1}{n_e^2(\theta)} = \frac{\cos^2\theta}{n_o^2} + \frac{\sin^2\theta}{n_e^2}")
-
-    st.markdown("---")
-
-    st.subheader("2. 광탄성 법칙 (Photoelasticity & Stress-Optic Law)")
-    st.write("외부 응력을 받는 투명 변형체에 편광을 통과시키면 주응력 차이에 비례하여 위상차가 발생합니다.")
-
-    st.markdown("**Brewster의 광탄성 법칙:**")
-    st.latex(r"n_1 - n_2 = C (\sigma_1 - \sigma_2)")
-
-    st.markdown("**상대 위상차 (Relative Retardation, $\delta$):**")
-    st.latex(r"\delta = \frac{2\pi d}{\lambda} (n_1 - n_2) = \frac{2\pi d}{\lambda} C (\sigma_1 - \sigma_2)")
-
-    st.markdown("* $n_1, n_2$: 주응력 방향의 굴절률\n* $\sigma_1, \sigma_2$: 주응력 (Principal Stresses)\n* $C$: 재료의 광탄성 계수 (Stress-Optic Coefficient)\n* $d$: 시험편의 두께, $\lambda$: 투과하는 빛의 파장")
+        st.subheader("🎛️ 하중 및 편광 조건 설정")
+        load_force = st.slider("인가 하중 크기 (Load Force, N)", 10
