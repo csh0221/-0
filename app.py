@@ -5,11 +5,7 @@ import matplotlib.pyplot as plt
 # -----------------------------------------------------------------------------
 # 페이지 기본 설정
 # -----------------------------------------------------------------------------
-st.set_page_config(
-    page_title="광학적 이방체 및 광탄성 시뮬레이터",
-    page_icon="🔬",
-    layout="wide"
-)
+st.set_page_config(page_title="광학적 이방체 및 광탄성 시뮬레이터", page_icon="🔬", layout="wide")
 
 st.title("🔬 광학적 이방체(복굴절) 및 광탄성(Photoelasticity) 시뮬레이터")
 st.markdown("이 앱은 **결정체의 광학적 이방성(Birefringence)**과 **재료의 광탄성 응력 해석(Photoelastic Stress Analysis)** 개념을 수치 시뮬레이션 및 시각화로 제공합니다.")
@@ -51,4 +47,4 @@ with tab1:
 
         material_choice = st.selectbox("대표적인 이방성 결정 선택", ["방해석 (Calcite)", "수정 (Quartz)", "금강석/루틸 (Rutile)", "사용자 정의"], key="tab1_material", on_change=update_material_indices)
         n_o = st.slider("정상광선 굴절률 (n_o)", 1.000, 3.000, key="tab1_no", step=0.001)
-        n_e = st.slider("
+        n_e = st.slider("비
