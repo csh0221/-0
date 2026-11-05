@@ -45,6 +45,4 @@ with tab1:
         if 'tab1_ne' not in st.session_state:
             st.session_state.tab1_ne = 1.486
 
-        material_choice = st.selectbox("대표적인 이방성 결정 선택", ["방해석 (Calcite)", "수정 (Quartz)", "금강석/루틸 (Rutile)", "사용자 정의"], key="tab1_material", on_change=update_material_indices)
-        n_o = st.slider("정상광선 굴절률 (n_o)", 1.000, 3.000, key="tab1_no", step=0.001)
-        n_e = st.slider("비
+        material_choice = st.selectbox("대표적인 이방성 결정 선택", ["방해석 (Calcite)", "수정 (Quartz)", "금강석/루틸 (Rutile)",
