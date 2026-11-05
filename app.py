@@ -12,9 +12,7 @@ st.set_page_config(
 )
 
 st.title("🔬 광학적 이방체(복굴절) 및 광탄성(Photoelasticity) 시뮬레이터")
-st.markdown("""
-이 앱은 **결정체의 광학적 이방성(Birefringence)**과 **재료의 광탄성 응력 해석(Photoelastic Stress Analysis)** 개념을 수치 시뮬레이션 및 시각화로 제공합니다.
-""")
+st.markdown("이 앱은 **결정체의 광학적 이방성(Birefringence)**과 **재료의 광탄성 응력 해석(Photoelastic Stress Analysis)** 개념을 수치 시뮬레이션 및 시각화로 제공합니다.")
 
 tab1, tab2, tab3 = st.tabs([
     "💎 1. 광학적 이방체 & 복굴절 (Birefringence)", 
@@ -133,11 +131,8 @@ with tab1:
         re_deg_val = round(np.degrees(theta_r_e), 2)
         diff_deg_val = round(abs(np.degrees(theta_r_o - theta_r_e)), 2)
 
-        st.info(f"**📊 계산 결과 (Ray Trajectory Data):**\n"
-                f"* 복굴절률 차이 (Δn = n_e - n_o): `{delta_n_val:+.4f}`\n"
-                f"* o-ray 굴절각: `{ro_deg_val}°`\n"
-                f"* e-ray 굴절각: `{re_deg_val}°`\n"
-                f"* 광선 분리 각도 (Δθ): `{diff_deg_val}°`")
+        info_text = "**📊 계산 결과 (Ray Trajectory Data):**\n" + f"* 복굴절률 차이 (Δn = n_e - n_o): `{delta_n_val:+.4f}`\n" + f"* o-ray 굴절각: `{ro_deg_val}°`\n" + f"* e-ray 굴절각: `{re_deg_val}°`\n" + f"* 광선 분리 각도 (Δθ): `{diff_deg_val}°`"
+        st.info(info_text)
 
 # =============================================================================
 # TAB 2: 광탄성 응력 해석 (Photoelasticity)
@@ -150,7 +145,7 @@ with tab2:
 
     with c1:
         st.subheader("🎛️ 시험편 및 응력 조건 설정")
-        model_type = st.selectbox("하중 시험편 형태 선택", ["3점 굽힘 보 (3-Point Bending Beam)"])
+        model_type = st.selectbox("하중 시험편 형태 선택", ["3점 굽힘 보 (3-Point Bending Beam)", "원형 압축 링 (Compressed Ring)"])
         load_force = st.slider("인가 하중 / 응력 크기 (Load, N)", 10, 200, 80, step=5, key="tab2_force")
         fringe_constant = st.slider("재료 광탄성 정수 (C, GPa⁻¹)", 0.5, 5.0, 2.0, step=0.1, key="tab2_C")
         pol_choice = st.radio("편광기 구성 (Polariscope Type)", ["평면 편광기 (Plane Polariscope)", "원 편광기 (Circular Polariscope)"], key="tab2_pol")
@@ -166,12 +161,27 @@ with tab2:
 
         if model_type == "3점 굽힘 보 (3-Point Bending Beam)":
             L = 4.0
-            P = load_force * 0.5
+            P = load_force * 0.1
             M = P * (L / 2.0 - np.abs(X))
             sigma_x = M * Y
             sigma_y = np.zeros_like(X)
             tau_xy = -P * np.sign(X) * (1.0 - Y**2) * 0.5
-
+            scale_factor = 25.0
+        else:
+            R_outer, R_inner = 1.0, 0.4
+            r = np.sqrt(X**2 + Y**2)
+            r = np.maximum(r, 0.01)
+            mask = (r < R_inner) | (r > R_outer)
+            
+            P = load_force * 0.005
+            sigma_x = P * (1.0 - (R_inner / r)**2) * np.cos(2.0 * np.arctan2(Y, X))
+            sigma_y = -P * (1.0 + (R_inner / r)**2) * np.sin(2.0 * np.arctan2(Y, X))
+            tau_xy = P * (R_inner / r)**2 * np.sin(2.0 * np.arctan2(Y, X))
+            
+            sigma_x[mask] = 0.0
+            sigma_y[mask] = 0.0
+            tau_xy[mask] = 0.0
+            scale_factor = 25.0
 
         center_stress = (sigma_x + sigma_y) / 2.0
         radius_stress = np.sqrt(((sigma_x - sigma_y) / 2.0)**2 + tau_xy**2)
@@ -179,19 +189,19 @@ with tab2:
         sigma_1 = center_stress + radius_stress
         sigma_2 = center_stress - radius_stress
 
-        theta_p = 0.5 * np.arctan2(2 * tau_xy, sigma_x - sigma_y)
+        theta_p = 0.5 * np.arctan2(2.0 * tau_xy, sigma_x - sigma_y)
         delta = fringe_constant * (sigma_1 - sigma_2)
 
         lambda_r = 650.0
         lambda_g = 540.0
         lambda_b = 450.0
 
-        I_r = np.sin(delta * 200.0 / lambda_r) ** 2
-        I_g = np.sin(delta * 200.0 / lambda_g) ** 2
-        I_b = np.sin(delta * 200.0 / lambda_b) ** 2
+        I_r = np.sin(delta * scale_factor / lambda_r) ** 2
+        I_g = np.sin(delta * scale_factor / lambda_g) ** 2
+        I_b = np.sin(delta * scale_factor / lambda_b) ** 2
 
         if show_isoclinic:
-            isoclinic_factor = np.sin(2 * theta_p)**2
+            isoclinic_factor = np.sin(2.0 * theta_p)**2
             I_r *= isoclinic_factor
             I_g *= isoclinic_factor
             I_b *= isoclinic_factor
@@ -209,11 +219,8 @@ with tab2:
         st.pyplot(fig2)
         plt.close(fig2)
 
-        st.success("""
-        💡 **관찰 포인트:**
-        * **등색선 (Isochromatic Fringes):** 무지개 색상 띠의 밀도가 높은 곳이 **응력 집중(Stress Concentration)** 지역입니다.
-        * **등경사선 (Isoclinics):** 평면 편광기 모드의 검은색 띠는 **주응력 방향이 편광축과 일치하는 위치**를 의미합니다.
-        """)
+        success_text = "💡 **관찰 포인트:**\n* **등색선 (Isochromatic Fringes):** 무지개 색상 띠의 밀도가 높은 곳이 **응력 집중(Stress Concentration)** 지역입니다.\n* **등경사선 (Isoclinics):** 평면 편광기 모드의 검은색 띠는 **주응력 방향이 편광축과 일치하는 위치**를 의미합니다."
+        st.success(success_text)
 
 # =============================================================================
 # TAB 3: 이론 및 수식 정리
@@ -222,9 +229,7 @@ with tab3:
     st.header("📚 광학적 이방성 & 광탄성 수학적 모델")
 
     st.subheader("1. 광학적 이방체 및 복굴절 (Birefringence)")
-    st.write("""
-    등방성 매질(공기, 유리)에서는 빛의 속도가 방향에 상관없이 일정하지만, 이방성 결정(방해석, 수정 등)에서는 결정축 방향에 따라 굴절률이 달라집니다.
-    """)
+    st.write("등방성 매질(공기, 유리)에서는 빛의 속도가 방향에 상관없이 일정하지만, 이방성 결정(방해석, 수정 등)에서는 결정축 방향에 따라 굴절률이 달라집니다.")
     
     st.markdown("**정상광선 (Ordinary Ray, $o$-ray) 굴절률:**")
     st.latex(r"n_o = \text{Constant}")
@@ -235,9 +240,7 @@ with tab3:
     st.markdown("---")
 
     st.subheader("2. 광탄성 법칙 (Photoelasticity & Stress-Optic Law)")
-    st.write("""
-    외부 응력을 받는 투명 변형체에 편광을 통과시키면 주응력 차이에 비례하여 위상차가 발생합니다.
-    """)
+    st.write("외부 응력을 받는 투명 변형체에 편광을 통과시키면 주응력 차이에 비례하여 위상차가 발생합니다.")
 
     st.markdown("**Brewster의 광탄성 법칙:**")
     st.latex(r"n_1 - n_2 = C (\sigma_1 - \sigma_2)")
@@ -245,9 +248,4 @@ with tab3:
     st.markdown("**상대 위상차 (Relative Retardation, $\delta$):**")
     st.latex(r"\delta = \frac{2\pi d}{\lambda} (n_1 - n_2) = \frac{2\pi d}{\lambda} C (\sigma_1 - \sigma_2)")
 
-    st.markdown("""
-    * $n_1, n_2$: 주응력 방향의 굴절률
-    * $\sigma_1, \sigma_2$: 주응력 (Principal Stresses)
-    * $C$: 재료의 광탄성 계수 (Stress-Optic Coefficient)
-    * $d$: 시험편의 두께, $\lambda$: 투과하는 빛의 파장
-    """)
+    st.markdown("* $n_1, n_2$: 주응력 방향의 굴절률\n* $\sigma_1, \sigma_2$: 주응력 (Principal Stresses)\n* $C$: 재료의 광탄성 계수 (Stress-Optic Coefficient)\n* $d$: 시험편의 두께, $\lambda$: 투과하는 빛의 파장")
