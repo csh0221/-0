@@ -78,17 +78,3 @@ with tab1:
         n_e_eff = 1.0 / np.sqrt(term_cos**2 + term_sin**2)
 
         sin_theta_re = np.sin(theta_i) / n_e_eff
-        val_re = np.clip(sin_theta_re, -1.0, 1.0)
-        theta_r_e = np.arcsin(val_re)
-
-        fig, ax = plt.subplots(figsize=(9, 6.5), facecolor='#0e1117')
-        ax.set_facecolor('#0e1117')
-        
-        ax.fill_between([-4, 4], 0, 4, color='#1a2436', alpha=0.7, label="Air (n=1.0)")
-        ax.fill_between([-4, 4], -4, 0, color='#161b26', alpha=0.9, label="Crystal Medium")
-        ax.axhline(0, color='#ffffff', lw=2, linestyle='-', alpha=0.9)
-        ax.axvline(0, color='#888888', linestyle=':', alpha=0.6, label="Normal Line")
-
-        x_inc = [-3 * np.tan(theta_i), 0]
-        y_inc = [3, 0]
-        ax.plot(x_inc, y_inc, color=light_color
