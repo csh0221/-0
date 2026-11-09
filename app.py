@@ -41,14 +41,7 @@ with tab1:
         if 'tab1_ne' not in st.session_state:
             st.session_state.tab1_ne = 1.486
 
-        mat_options = [
-            "Calcite (복굴절/일축성 음성 - 방해석)", 
-            "Quartz (복굴절/일축성 양성 - 수정)", 
-            "Rutile (복굴절/일축성 양성 - 루틸)", 
-            "Halite/Glass (단굴절/등방성 - 암염/유리)", 
-            "Diamond (단굴절/등방성 - 다이아몬드)", 
-            "Custom"
-        ]
+        mat_options = ["Calcite (복굴절/일축성 음성 - 방해석)", "Quartz (복굴절/일축성 양성 - 수정)", "Rutile (복굴절/일축성 양성 - 루틸)", "Halite/Glass (단굴절/등방성 - 암염/유리)", "Diamond (단굴절/등방성 - 다이아몬드)", "Custom"]
         material_choice = st.selectbox("결정 재질 선택", mat_options, key="tab1_material", on_change=update_material_indices)
         
         n_o = st.slider("정상광선 굴절률 (n_o)", 1.000, 3.000, key="tab1_no", step=0.001)
@@ -97,13 +90,3 @@ with tab1:
         ax1.fill_between([-4, 4], 0, 4, color='#1a2436', alpha=0.7, label="Air (n=1.0)")
         ax1.fill_between([-4, 4], -4, 0, color='#161b26', alpha=0.9, label="Crystal Medium")
         ax1.axhline(0, color='#ffffff', lw=2, linestyle='-', alpha=0.9)
-        ax1.axvline(0, color='#888888', linestyle=':', alpha=0.6, label="Normal Line")
-
-        x_inc = [-3 * np.tan(theta_i), 0]
-        y_inc = [3, 0]
-        ax1.plot(x_inc, y_inc, color=light_color, lw=6, alpha=0.3)
-        ax1.plot(x_inc, y_inc, color=light_color, lw=2.5, label="Incident Ray")
-
-        x_o = [0, 3.5 * np.sin(theta_r_o)]
-        y_o = [0, -3.5 * np.cos(theta_r_o)]
-        ax1.plot(
